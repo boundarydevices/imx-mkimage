@@ -9,7 +9,7 @@ INCLUDE = ./lib
 
 $(MKIMG): mkimage_imx8.c
 	@echo "Compiling mkimage_imx8"
-	$(CC) $(CFLAGS) mkimage_imx8.c -o $(MKIMG) -lz
+	$(CC) $(CFLAGS) mkimage_imx8.c -o $(MKIMG) $(LDFLAGS) -lz
 
 $(DCD_CFG): $(DCD_CFG_SRC)
 	@echo "Converting iMX8M DCD file" 
