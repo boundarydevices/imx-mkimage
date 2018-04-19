@@ -56,21 +56,13 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
 
 .PHONY: clean
 clean:
-	@rm -f $(MKIMG) $(DCD_CFG) .imx8mq_dcd.cfg.cfgtmp.d u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb.* u-boot.its* u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin $(OUTIMG)
+	@rm -f $(MKIMG) $(DCD_CFG) .imx8mq_dcd.cfg.cfgtmp.d u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin $(OUTIMG)
 
-dtbs_evk = fsl-imx8mq-evk.dtb
-dtbs_nitrogen8m = imx8mq-nitrogen8m.dtb
-
-u-boot.itb.evk: $(dtbs_evk)
-	./mkimage_fit_atf.sh $(dtbs_evk) > u-boot.its.evk
-	./mkimage_uboot -E -p 0x3000 -f u-boot.its.evk u-boot.itb.evk
-	@rm -f u-boot.its.evk
-
-
-u-boot.itb.nitrogen8m: $(dtbs_nitrogen8m)
-	./mkimage_fit_atf.sh $(dtbs_nitrogen8m) > u-boot.its.nitrogen8m
-	./mkimage_uboot -E -p 0x3000 -f u-boot.its.nitrogen8m u-boot.itb.nitrogen8m
-	@rm -f u-boot.its.nitrogen8m
+dtbs = fsl-imx8mq-evk.dtb
+u-boot.itb: $(dtbs)
+	./mkimage_fit_atf.sh $(dtbs) > u-boot.its
+	./mkimage_uboot -E -p 0x3000 -f u-boot.its u-boot.itb
+	@rm -f u-boot.its
 
 dtbs_ddr3l = fsl-imx8mq-ddr3l-arm2.dtb
 u-boot-ddr3l.itb: $(dtbs_ddr3l)
@@ -82,11 +74,8 @@ u-boot-ddr4.itb: $(dtbs_ddr4)
 	./mkimage_fit_atf.sh $(dtbs_ddr4) > u-boot-ddr4.its
 	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr4.its u-boot-ddr4.itb
 
-flash_nitrogen8m: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr.bin u-boot.itb.nitrogen8m
-	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb.nitrogen8m 0x40200000 0x60000 -out $(OUTIMG)
-
-flash_evk: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr.bin u-boot.itb.evk
-	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb.evk 0x40200000 0x60000 -out $(OUTIMG)
+flash_evk: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr.bin u-boot.itb
+	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
 
 flash_ddr3l_arm2: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr3l.bin u-boot-ddr3l.itb
 	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr3l.bin 0x7E1000 -second_loader u-boot-ddr3l.itb 0x40200000 0x60000 -out $(OUTIMG)
@@ -94,11 +83,8 @@ flash_ddr3l_arm2: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr3l.bin u-boot-ddr
 flash_ddr4_arm2: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr4.bin u-boot-ddr4.itb
 	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr4.bin 0x7E1000 -second_loader u-boot-ddr4.itb 0x40200000 0x60000 -out $(OUTIMG)
 
-flash_nitrogen8m_no_hdmi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb.nitrogen8m
-	./mkimage_imx8 -fit -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb.nitrogen8m 0x40200000 0x60000 -out $(OUTIMG)
-
-flash_evk_no_hdmi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb.evk
-	./mkimage_imx8 -fit -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb.evk 0x40200000 0x60000 -out $(OUTIMG)
+flash_evk_no_hdmi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
+	./mkimage_imx8 -fit -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
 
 flash_ddr3l_arm2_no_hdmi: $(MKIMG) u-boot-spl-ddr3l.bin u-boot-ddr3l.itb
 	./mkimage_imx8 -fit -loader u-boot-spl-ddr3l.bin 0x7E1000 -second_loader u-boot-ddr3l.itb 0x40200000 0x60000 -out $(OUTIMG)
@@ -106,19 +92,12 @@ flash_ddr3l_arm2_no_hdmi: $(MKIMG) u-boot-spl-ddr3l.bin u-boot-ddr3l.itb
 flash_ddr4_arm2_no_hdmi: $(MKIMG) u-boot-spl-ddr4.bin u-boot-ddr4.itb
 	./mkimage_imx8 -fit -loader u-boot-spl-ddr4.bin 0x7E1000 -second_loader u-boot-ddr4.itb 0x40200000 0x60000 -out $(OUTIMG)
 
-flash_hdmi_spl_uboot_nitrogen8m: flash_nitrogen8m
+flash_hdmi_spl_uboot: flash_evk
 
-flash_spl_uboot_nitrogen8m: flash_nitrogen8m_no_hdmi
+flash_spl_uboot: flash_evk_no_hdmi
 
-print_fit_hab_nitrogen8m: u-boot-nodtb.bin bl31.bin $(dtbs_nitrogen8m)
-	./print_fit_hab.sh 0x60000 $(dtbs_nitrogen8m)
-
-flash_hdmi_spl_uboot_evk: flash_evk
-
-flash_spl_uboot_evk: flash_evk_no_hdmi
-
-print_fit_hab_evk: u-boot-nodtb.bin bl31.bin $(dtbs_evk)
-	./print_fit_hab.sh 0x60000 $(dtbs_evk)
+print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtbs)
+	./print_fit_hab.sh 0x60000 $(dtbs)
 
 nightly :
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/lpddr4_pmu_train_1d_dmem.bin -O lpddr4_pmu_train_1d_dmem.bin
@@ -127,10 +106,8 @@ nightly :
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/lpddr4_pmu_train_2d_imem.bin -O lpddr4_pmu_train_2d_imem.bin
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/bl31-imx8mq.bin -O bl31.bin
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/u-boot-spl.bin-imx8mqevk-sd -O u-boot-spl.bin
-	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/u-boot-spl.bin-imx8mq-nitrogen8m-sd -O u-boot-spl.bin
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/u-boot-nodtb.bin -O u-boot-nodtb.bin
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/fsl-imx8mq-evk.dtb -O fsl-imx8mq-evk.dtb
-	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/imx8mq-nitrogen8m.dtb -O imx8mq-nitrogen8m.dtb
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/signed_hdmi_imx8m.bin -O signed_hdmi_imx8m.bin
 	@$(WGET) -q $(SERVER)/$(DIR)/$(FW_DIR)/mkimage_uboot -O mkimage_uboot
 
