@@ -76,18 +76,10 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
 clean:
 	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-lpddr4.bin u-boot-lpddr4.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin $(OUTIMG)
 
-u-boot-lpddr4.itb: $(dtbs)
-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
-	./mkimage_uboot -E -p 0x3000 -f u-boot.its $@
-	@rm -f u-boot.its
-
-u-boot-ddr3l.itb: $(dtbs)
-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot-ddr3l.its
-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr3l.its $@
-
-u-boot-ddr4.itb: $(dtbs)
-	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot-ddr4.its
-	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr4.its $@
+u-boot-%.itb: $(dtbs)
+	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > $(@F).its
+	./mkimage_uboot -E -p 0x3000 -f $(@F).its $@
+	@rm -f $(@F).its
 
 ifeq ($(HDMI),yes)
 flash_lpddr4: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-lpddr4.bin u-boot-lpddr4.itb
