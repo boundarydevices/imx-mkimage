@@ -39,7 +39,7 @@ $(MKIMG): mkimage_imx8.c
 	@echo "Compiling mkimage_imx8"
 	$(CC) $(CFLAGS) mkimage_imx8.c -o $(MKIMG) -lz
 
-u-boot-spl-ddr.bin: u-boot-spl.bin lpddr4_pmu_train_1d_imem.bin lpddr4_pmu_train_1d_dmem.bin lpddr4_pmu_train_2d_imem.bin lpddr4_pmu_train_2d_dmem.bin
+u-boot-spl-lpddr4.bin: u-boot-spl.bin lpddr4_pmu_train_1d_imem.bin lpddr4_pmu_train_1d_dmem.bin lpddr4_pmu_train_2d_imem.bin lpddr4_pmu_train_2d_dmem.bin
 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 lpddr4_pmu_train_1d_imem.bin lpddr4_pmu_train_1d_imem_pad.bin
 	@objcopy -I binary -O binary --pad-to 0x4000 --gap-fill=0x0 lpddr4_pmu_train_1d_dmem.bin lpddr4_pmu_train_1d_dmem_pad.bin
 	@objcopy -I binary -O binary --pad-to 0x8000 --gap-fill=0x0 lpddr4_pmu_train_2d_imem.bin lpddr4_pmu_train_2d_imem_pad.bin
@@ -74,9 +74,9 @@ u-boot-atf-tee.bin: u-boot.bin bl31.bin tee.bin
 
 .PHONY: clean
 clean:
-	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-ddr.bin u-boot.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin $(OUTIMG)
+	@rm -f $(MKIMG) u-boot-atf.bin u-boot-atf-tee.bin u-boot-spl-lpddr4.bin u-boot-lpddr4.itb u-boot.its u-boot-ddr3l.itb u-boot-ddr3l.its u-boot-spl-ddr3l.bin u-boot-ddr4.itb u-boot-ddr4.its u-boot-spl-ddr4.bin $(OUTIMG)
 
-u-boot.itb: $(dtbs)
+u-boot-lpddr4.itb: $(dtbs)
 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./mkimage_fit_atf.sh $(dtbs) > u-boot.its
 	./mkimage_uboot -E -p 0x3000 -f u-boot.its $@
 	@rm -f u-boot.its
@@ -90,8 +90,8 @@ u-boot-ddr4.itb: $(dtbs)
 	./mkimage_uboot -E -p 0x3000 -f u-boot-ddr4.its $@
 
 ifeq ($(HDMI),yes)
-flash: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr.bin u-boot.itb
-	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
+flash_lpddr4: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-lpddr4.bin u-boot-lpddr4.itb
+	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-lpddr4.bin 0x7E1000 -second_loader u-boot-lpddr4.itb 0x40200000 0x60000 -out $(OUTIMG)
 
 flash_dp: $(MKIMG) signed_dp_imx8m.bin u-boot-spl-ddr.bin u-boot.itb
 	./mkimage_imx8 -fit -signed_hdmi signed_dp_imx8m.bin -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
@@ -103,7 +103,7 @@ flash_ddr4: $(MKIMG) signed_hdmi_imx8m.bin u-boot-spl-ddr4.bin u-boot-ddr4.itb
 	./mkimage_imx8 -fit -signed_hdmi signed_hdmi_imx8m.bin -loader u-boot-spl-ddr4.bin 0x7E1000 -second_loader u-boot-ddr4.itb 0x40200000 0x60000 -out $(OUTIMG)
 
 else
-flash: flash_no_hdmi
+flash_lpddr4: flash_lpddr4_no_hdmi
 
 flash_ddr3l: flash_ddr3l_no_hdmi
 
@@ -111,8 +111,8 @@ flash_ddr4: flash_ddr4_no_hdmi
 
 endif
 
-flash_no_hdmi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
-	./mkimage_imx8 -fit -loader u-boot-spl-ddr.bin 0x7E1000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
+flash_lpddr4_no_hdmi: $(MKIMG) u-boot-spl-lpddr4.bin u-boot-lpddr4.itb
+	./mkimage_imx8 -fit -loader u-boot-spl-lpddr4.bin 0x7E1000 -second_loader u-boot-lpddr4.itb 0x40200000 0x60000 -out $(OUTIMG)
 
 flash_ddr3l_no_hdmi: $(MKIMG) u-boot-spl-ddr3l.bin u-boot-ddr3l.itb
 	./mkimage_imx8 -fit -loader u-boot-spl-ddr3l.bin 0x7E1000 -second_loader u-boot-ddr3l.itb 0x40200000 0x60000 -out $(OUTIMG)
@@ -124,11 +124,13 @@ flash_flexspi: $(MKIMG) u-boot-spl-ddr.bin u-boot.itb
 	./mkimage_imx8 -dev flexspi -fit -loader u-boot-spl-ddr.bin 0x7E2000 -second_loader u-boot.itb 0x40200000 0x60000 -out $(OUTIMG)
 	./$(QSPI_PACKER) $(QSPI_HEADER)
 
-flash_hdmi_spl_uboot: flash
+flash_hdmi_spl_uboot: flash_lpddr4
+flash_lpddr4_hdmi_spl_uboot: flash_lpddr4
 
 flash_dp_spl_uboot: flash_dp
 
-flash_spl_uboot: flash_no_hdmi
+flash_spl_uboot: flash_lpddr4_no_hdmi
+flash_lpddr4_spl_uboot: flash_lpddr4_no_hdmi
 
 print_fit_hab: u-boot-nodtb.bin bl31.bin $(dtbs)
 	TEE_LOAD_ADDR=$(TEE_LOAD_ADDR) ATF_LOAD_ADDR=$(ATF_LOAD_ADDR) ./print_fit_hab.sh 0x60000 $(dtbs)
