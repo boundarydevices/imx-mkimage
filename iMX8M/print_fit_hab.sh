@@ -47,12 +47,13 @@ atf_size=`printf "0x%X" ${atf_size}`
 atf_sign_off=`printf "0x%X" ${atf_sign_off}`
 atf_load_addr=`printf "0x%X" ${atf_load_addr}`
 
-echo ${uboot_load_addr} ${uboot_sign_off} ${uboot_size}
-echo ${atf_load_addr} ${atf_sign_off} ${atf_size}
+echo -e "Name\tLoad\t\tOffset\tSize"
+echo -e "U-Boot\t${uboot_load_addr}\t${uboot_sign_off}\t${uboot_size}"
+echo -e "ATF\t${atf_load_addr}\t${atf_sign_off}\t${atf_size}"
 
-if [ ${tee_size} != 0x0 ]
+if [ "${tee_size}" != "0x0" ]
 then
-	echo ${tee_load_addr} ${tee_sign_off} ${tee_size}
+	echo -e "TEE\t${tee_load_addr}\t${tee_sign_off}\t${tee_size}"
 fi
 
 cnt=0
@@ -73,7 +74,7 @@ do
 		let last_sign_off=$(((last_sign_off + fdt${cnt}_size + 3) & ~3))
 		let last_load_addr=$((last_load_addr + fdt${cnt}_size))
 
-		echo ${fdt_load_addr} ${fdt_sign_off} ${fdt_size}
+		echo -e "DTB\t${fdt_load_addr}\t${fdt_sign_off}\t${fdt_size}"
 	fi
 
 	cnt=$((cnt+1))
