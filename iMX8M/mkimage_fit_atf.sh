@@ -18,8 +18,8 @@ if [ ! -f $BL31 ]; then
 	echo "ERROR: BL31 file $BL31 NOT found" >&2
 	exit 0
 else
-	echo "bl31.bin size: " >&2
-	ls -lct bl31.bin | awk '{print $5}' >&2
+	echo "$BL31 size: " >&2
+	ls -lct $BL31 | awk '{print $5}' >&2
 fi
 
 BL32="tee.bin"
