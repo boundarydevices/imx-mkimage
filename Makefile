@@ -57,10 +57,7 @@ help:
 	@echo "	  flash_all     - SCU + AP + M4 + SCD + CSF(AP & SCU) w/ DCDs"
 	@echo ""
 	@echo "Parts w/o SCU"
-	@echo "	  flash_hdmi_spl_uboot     - HDMI FW + u-boot spl"
-	@echo "	  flash_hdmi_spl_uboot_tee - HDMI FW + u-boot spl w/ tee"
-	@echo "	  flash_spl_uboot          - u-boot spl"
-	@echo "	  flash_spl_uboot_tee      - u-boot spl w/tee"
+	@echo "	  u-boot-%.hdmibin     - HDMI FW + u-boot spl"
 	@echo
 	@echo "Typical flash cmd: dd if=iMX8QM/flash.bin of=/dev/<your device> bs=1k seek=33"
 	@echo

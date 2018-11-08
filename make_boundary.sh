@@ -3,6 +3,12 @@
 export ARCH=arm64
 export CROSS_COMPILE=aarch64-linux-gnu-
 
+if [ -z $1 ] ; then
+	sz="2g"
+else
+	sz=$1
+fi
+
 if [ -z ${UBOOT_PATH} ]; then
 	UBOOT_PATH=../u-boot-imx6
 fi
@@ -22,7 +28,7 @@ if ! [ $? -eq 0 ] ; then
 fi
 
 make clean
-make SOC=iMX8M DTBS=${UBOOT_DTB} flash_hdmi_spl_uboot
+make SOC=iMX8M DTBS=${UBOOT_DTB} u-boot-lpddr4-${sz}.hdmibin && cp iMX8M/u-boot-lpddr4-${sz}.hdmibin iMX8M/flash.bin;
 
-cd iMX8M && ./print_fit_hab.sh 0x60000 ${UBOOT_DTB} ; cd ..
-echo "Next: dd if=iMX8M/flash.bin of=/dev/sd[x] bs=1K seek=33 skip=0"
+cd iMX8M && ./print_fit_hab.sh 0x60000 bl31_${sz}.bin ${UBOOT_DTB} ; cd ..
+echo "Next: dd if=iMX8M/u-boot-lpddr4-${sz}.hdmibin of=/dev/sd[x] bs=1K seek=33 skip=0"

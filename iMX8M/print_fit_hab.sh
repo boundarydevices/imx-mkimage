@@ -3,6 +3,7 @@
 BL32="tee.bin"
 
 let fit_off=$1
+BL31=$2
 
 # We dd flash.bin to 33KB "0x8400" offset, so need minus 0x8400
 let uboot_sign_off=$((fit_off - 0x8400 + 0x3000))
@@ -11,7 +12,7 @@ let uboot_load_addr=0x40200000
 
 let atf_sign_off=$((uboot_sign_off + uboot_size))
 let atf_load_addr=0x910000
-let atf_size=$(ls -lct bl31.bin | awk '{print $5}')
+let atf_size=$(ls -lct ${BL31} | awk '{print $5}')
 
 if [ ! -f $BL32 ]; then
 	let tee_size=0x0
@@ -51,7 +52,7 @@ fi
 cnt=0
 for dtname in $*
 do
-	if [ ${cnt} != 0 ]
+	if [ ${cnt} -gt 1 ]
 	then
 		let fdt${cnt}_size=$(ls -lct $dtname | awk '{print $5}')
 
