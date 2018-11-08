@@ -3,6 +3,7 @@
 BL32="tee.bin"
 
 let fit_off=$1
+BL31=$2
 
 # keep backward compatibility
 [ -z "$TEE_LOAD_ADDR" ] && TEE_LOAD_ADDR="0xfe000000"
@@ -19,7 +20,7 @@ let uboot_load_addr=0x40200000
 
 let atf_sign_off=$(((uboot_sign_off + uboot_size + 3) & ~3))
 let atf_load_addr=$ATF_LOAD_ADDR
-let atf_size=$(ls -lct bl31.bin | awk '{print $5}')
+let atf_size=$(ls -lct ${BL31} | awk '{print $5}')
 
 if [ ! -f $BL32 ]; then
 	let tee_size=0x0
@@ -59,7 +60,7 @@ fi
 cnt=0
 for dtname in $*
 do
-	if [ ${cnt} != 0 ]
+	if [ ${cnt} -gt 1 ]
 	then
 		let fdt${cnt}_size=$(ls -lct $dtname | awk '{print $5}')
 
