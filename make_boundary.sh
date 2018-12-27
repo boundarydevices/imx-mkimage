@@ -9,8 +9,8 @@ if [ -z ${UBOOT_PATH} ]; then
 fi
 
 if [ -z ${UBOOT_DTB} ]; then
-	UBOOT_DTB=imx8mq-nitrogen8m.dtb
 	UBOOT_DTB=fsl-imx8mm-evk.dtb
+	UBOOT_DTB=imx8mm-nitrogen8mm.dtb
 fi
 
 
