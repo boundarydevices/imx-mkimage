@@ -15,6 +15,7 @@ fi
 if [ -z ${UBOOT_DTB} ]; then
 	UBOOT_DTB=fsl-imx8mm-evk.dtb
 	UBOOT_DTB=imx8mm-nitrogen8mm.dtb
+	UBOOT_DTB=imx8mq-nitrogen8m_som.dtb
 	UBOOT_DTB=imx8mq-nitrogen8m.dtb
 fi
 
