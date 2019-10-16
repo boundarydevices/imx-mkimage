@@ -15,7 +15,7 @@ SOC_DIR = iMX8M
 endif
 SOC_DIR ?= $(SOC)
 
-ifdef $(DTBS)
+ifdef DTBS
 EXTRAS := dtbs=$(DTBS)
 endif
 
